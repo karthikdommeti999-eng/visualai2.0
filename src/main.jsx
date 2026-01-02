@@ -5,16 +5,16 @@ import './index.css'
 import App from './App.jsx'
 
 import ErrorBoundary from './components/ErrorBoundary'
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import ErrorBoundary from './components/ErrorBoundary'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
-      <GoogleOAuthProvider clientId="789922336469-nhd2f31r6gl94e3g5ll60q5289aba4h0.apps.googleusercontent.com">
+      <ErrorBoundary>
         <BrowserRouter>
           <App />
         </BrowserRouter>
-      </GoogleOAuthProvider>
+      </ErrorBoundary>
     </ErrorBoundary>
   </StrictMode>,
 )
