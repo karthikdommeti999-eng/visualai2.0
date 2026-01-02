@@ -19,39 +19,52 @@ app.use(express.json());
 // Serve static files from the React client build
 app.use(express.static(path.join(__dirname, '../dist')));
 
-// Mock AI Logic (In production, this would call OpenAI API)
-const generateAIResponse = (message) => {
-    const lowerMsg = message.toLowerCase();
+// Real AI Logic using OpenRouter
+const generateAIResponse = async (message) => {
+    try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer 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`,
+                "HTTP-Referer": "https://visualai.vercel.app",
+                "X-Title": "Visual AI",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "model": "deepseek/deepseek-chat", // Good all-around model
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are Karthik's AI Fitness & Life Coach. You are motivational, precise, and helpful. You help with workouts, diet, and general motivation. Keep answers concise."
+                    },
+                    { "role": "user", "content": message }
+                ]
+            })
+        });
 
-    if (lowerMsg.includes('workout') || lowerMsg.includes('plan')) {
-        return "Based on your profile, I recommend a High-Intensity Interval Training (HIIT) session today. 20 minutes active, 10 minutes rest. Focus on burpees and mountain climbers.";
+        const data = await response.json();
+        if (data.choices && data.choices.length > 0) {
+            return data.choices[0].message.content;
+        } else {
+            console.error("OpenRouter Error:", data);
+            return "I'm having trouble connecting to my brain right now. Please try again.";
+        }
+    } catch (error) {
+        console.error("AI Fetch Error:", error);
+        return "Sorry, I couldn't reach the AI server.";
     }
-    if (lowerMsg.includes('diet') || lowerMsg.includes('food')) {
-        return "For muscle recovery, ensure you're getting 2g of protein per kg of bodyweight. Try adding a whey protein shake or chicken breast to your next meal.";
-    }
-    if (lowerMsg.includes('pain') || lowerMsg.includes('hurt')) {
-        return "If you're experiencing pain, please stop immediately. It might be due to poor form. Rest for 24 hours and try applying ice if there's swelling.";
-    }
-    return "I'm analyzing your request... As your AI Fitness Coach, I suggest keeping your heart rate between 140-160 BPM for optimal fat loss today. How else can I assist you?";
 };
-
-app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Server is running' });
-});
 
 app.post('/api/chat', async (req, res) => {
     try {
         const { message } = req.body;
+        const response = await generateAIResponse(message);
 
-        // Simulate AI processing delay
-        setTimeout(() => {
-            const response = generateAIResponse(message);
-            res.json({
-                reply: response,
-                timestamp: new Date().toISOString(),
-                aiModel: 'ChatGPT-4o-Sport'
-            });
-        }, 1000);
+        res.json({
+            reply: response,
+            timestamp: new Date().toISOString(),
+            aiModel: 'OpenRouter-DeepSeek'
+        });
 
     } catch (error) {
         console.error('AI Error:', error);
@@ -68,8 +81,13 @@ app.use((req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-    // Keep process alive just in case
-    setInterval(() => { }, 10000);
-});
+// For Vercel Serverless
+export default app;
+
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+        // Keep process alive just in case
+        setInterval(() => { }, 10000);
+    });
+}

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
@@ -36,7 +37,7 @@ export const AuthProvider = ({ children }) => {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
                 if (email && password) {
-                    const fakeUser = { name, email };
+                    const fakeUser = { name, email, notifications: true }; // Default notifications on
                     setUser(fakeUser);
                     localStorage.setItem('user', JSON.stringify(fakeUser));
                     resolve(fakeUser);
@@ -47,13 +48,56 @@ export const AuthProvider = ({ children }) => {
         });
     };
 
+    const handleGoogleLogin = (credentialResponse) => {
+        try {
+            const decoded = jwtDecode(credentialResponse.credential);
+            const googleUser = {
+                name: decoded.name,
+                email: decoded.email,
+                avatar: decoded.picture,
+                notifications: true,
+                provider: 'google'
+            };
+            setUser(googleUser);
+            localStorage.setItem('user', JSON.stringify(googleUser));
+            return googleUser;
+        } catch (error) {
+            console.error("Google Login Error", error);
+            throw new Error("Failed to authenticate with Google");
+        }
+    };
+
+    const socialLogin = async (provider) => {
+        // Simulate Google/Facebook Login (Fallback or for other providers)
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const fakeUser = {
+                    name: provider === 'google' ? "Google User" : "Facebook User",
+                    email: `${provider}@example.com`,
+                    notifications: true
+                };
+                setUser(fakeUser);
+                localStorage.setItem('user', JSON.stringify(fakeUser));
+                resolve(fakeUser);
+            }, 800);
+        });
+    };
+
+    const toggleNotifications = (enabled) => {
+        if (user) {
+            const updatedUser = { ...user, notifications: enabled };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+        }
+    };
+
     const logout = () => {
         setUser(null);
         localStorage.removeItem('user');
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, signup, logout, socialLogin, handleGoogleLogin, toggleNotifications, loading }}>
             {!loading && children}
         </AuthContext.Provider>
     );

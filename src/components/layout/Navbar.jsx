@@ -42,7 +42,7 @@ export const Navbar = () => {
                             <Zap className="text-dark-900 w-5 h-5 fill-current" />
                         </div>
                         <span className="text-xl font-bold tracking-tight text-white">
-                            KARTHIK <span className="text-brand-teal">AI</span>
+                            VISUAL <span className="text-brand-teal">AI</span>
                         </span>
                     </Link>
 
