@@ -2,11 +2,12 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
-import { Mail, User } from 'lucide-react';
+import { Mail, Lock, User } from 'lucide-react';
 
 export const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { signup } = useAuth();
@@ -16,7 +17,7 @@ export const Signup = () => {
         e.preventDefault();
         setIsSubmitting(true);
         try {
-            await signup(name, email, "dummy-password");
+            await signup(name, email, password);
             navigate('/dashboard');
         } catch (err) {
             console.error(err);
@@ -64,7 +65,20 @@ export const Signup = () => {
                         </div>
                     </div>
 
-
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-300">Password</label>
+                        <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 w-5 h-5" />
+                            <input
+                                type="password"
+                                required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full bg-dark-900 border border-white/10 rounded-xl py-3 pl-12 pr-4 focus:outline-none focus:border-brand-teal text-white placeholder-gray-600 transition-colors"
+                                placeholder="••••••••"
+                            />
+                        </div>
+                    </div>
 
                     <Button className="w-full shadow-lg" disabled={isSubmitting}>
                         {isSubmitting ? 'Creating Account...' : 'Sign Up'}
