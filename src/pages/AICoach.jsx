@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mic, Send, Volume2, StopCircle, Zap } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { cn } from '../lib/utils';
 import ReactMarkdown from 'react-markdown';
 
 export const AICoach = () => {
+    const navigate = useNavigate();
     const [messages, setMessages] = useState([
         { role: 'assistant', content: "Hello! I'm your AI Fitness Assistant. I can build workout plans, give nutrition advice, or correct your form. Speak or type to start!" }
     ]);
@@ -77,9 +79,10 @@ export const AICoach = () => {
     };
 
     const handleSend = async () => {
-        if (!input.trim()) return;
+        const messageToSend = input.trim();
+        if (!messageToSend || loading) return;
 
-        const userMsg = { role: 'user', content: input };
+        const userMsg = { role: 'user', content: messageToSend };
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setLoading(true);
@@ -89,9 +92,13 @@ export const AICoach = () => {
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: input })
+                body: JSON.stringify({ message: messageToSend })
             });
             const data = await response.json();
+
+            if (data.error) {
+                throw new Error(data.error);
+            }
 
             const aiMsg = { role: 'assistant', content: data.reply };
             setMessages(prev => [...prev, aiMsg]);
@@ -101,7 +108,10 @@ export const AICoach = () => {
 
         } catch (error) {
             console.error(error);
-            setMessages(prev => [...prev, { role: 'assistant', content: "Sorry, I'm having trouble connecting to the server. Please ensure the backend is running." }]);
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: "Sorry, I'm having trouble connecting to the server. " + (error.message || "Please ensure the backend is running.")
+            }]);
         } finally {
             setLoading(false);
         }
@@ -117,7 +127,7 @@ export const AICoach = () => {
                         AI <span className="text-brand-teal">Coach</span>
                     </h1>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => window.location.href = '/'}>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
                     Exit
                 </Button>
             </div>
@@ -196,7 +206,7 @@ export const AICoach = () => {
                     <Button
                         onClick={handleSend}
                         className="rounded-full w-12 h-12 p-0 flex items-center justify-center"
-                        disabled={!input.trim() && !loading}
+                        disabled={!input.trim() || loading}
                     >
                         <Send size={18} />
                     </Button>

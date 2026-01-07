@@ -8,6 +8,7 @@ export const Signup = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const { signup } = useAuth();
@@ -15,12 +16,14 @@ export const Signup = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError('');
         setIsSubmitting(true);
         try {
             await signup(name, email, password);
             navigate('/dashboard');
         } catch (err) {
             console.error(err);
+            setError(err.message || 'Failed to create account. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
@@ -33,6 +36,12 @@ export const Signup = () => {
                     <h2 className="text-3xl font-bold mb-2">Create Account</h2>
                     <p className="text-gray-400">Join Karthik's AI Platform</p>
                 </div>
+
+                {error && (
+                    <div className="bg-red-500/10 text-red-500 p-3 rounded-lg text-sm mb-6 border border-red-500/20 text-center">
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">

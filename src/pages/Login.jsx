@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Mail, Lock } from 'lucide-react';
-import { Mail, Lock } from 'lucide-react';
 
 export const Login = () => {
     const [email, setEmail] = useState('');
