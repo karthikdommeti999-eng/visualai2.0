@@ -107,10 +107,14 @@ export const AICoach = () => {
             speakText(data.reply);
 
         } catch (error) {
-            console.error(error);
+            console.error("Chat Error:", error);
+            const errorMessage = error.message.includes('API key')
+                ? "AI Configuration Error: Missing API Key on the server. Please check Vercel settings."
+                : `Coach Connection Error: ${error.message || "The AI is currently resting. Please try again soon."}`;
+
             setMessages(prev => [...prev, {
                 role: 'assistant',
-                content: "Sorry, I'm having trouble connecting to the server. " + (error.message || "Please ensure the backend is running.")
+                content: errorMessage
             }]);
         } finally {
             setLoading(false);

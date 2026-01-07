@@ -32,7 +32,7 @@ const generateAIResponse = async (message) => {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${apiKey}`,
-                "HTTP-Referer": "https://visualai.vercel.app",
+                "HTTP-Referer": process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://visualai.live",
                 "X-Title": "Visual AI",
                 "Content-Type": "application/json"
             },
