@@ -129,6 +129,7 @@ export const AICoach = () => {
                     <Zap className="text-brand-teal" size={24} />
                     <h1 className="text-xl font-bold tracking-tight text-white">
                         AI <span className="text-brand-teal">Coach</span>
+                        <span className="text-xs text-gray-600 ml-2">v2.1</span>
                     </h1>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
